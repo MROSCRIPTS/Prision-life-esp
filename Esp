@@ -1,0 +1,90 @@
+-- ESP com botão de ligar/desligar para Prison Life (Delta/KRNL)
+
+local Players = game:GetService("Players")
+local CoreGui = game:GetService("CoreGui")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local ESPEnabled = false
+local connections = {}
+
+-- UI de botões
+local ScreenGui = Instance.new("ScreenGui", CoreGui)
+ScreenGui.Name = "ESP_UI"
+
+local onButton = Instance.new("TextButton", ScreenGui)
+onButton.Size = UDim2.new(0, 100, 0, 40)
+onButton.Position = UDim2.new(0, 10, 0, 200)
+onButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+onButton.Text = "LIGAR ESP"
+
+local offButton = Instance.new("TextButton", ScreenGui)
+offButton.Size = UDim2.new(0, 100, 0, 40)
+offButton.Position = UDim2.new(0, 10, 0, 250)
+offButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+offButton.Text = "DESLIGAR ESP"
+
+-- Criar ESP
+local function createESP(player)
+    if player == LocalPlayer then return end
+    local box = Drawing.new("Text")
+    box.Visible = false
+    box.Center = true
+    box.Outline = true
+    box.Font = 2
+    box.Size = 14
+    box.Color = Color3.new(1, 1, 1)
+
+    local function update()
+        if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
+            box.Visible = false
+            return
+        end
+
+        local pos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
+        if onScreen and ESPEnabled then
+            box.Position = Vector2.new(pos.X, pos.Y - 20)
+            box.Text = player.Name
+
+            local team = player.Team and player.Team.Name or ""
+            if team == "Guards" then
+                box.Color = Color3.fromRGB(0, 150, 255)
+            elseif team == "Inmates" then
+                box.Color = Color3.fromRGB(255, 140, 0)
+            elseif team == "Criminals" then
+                box.Color = Color3.fromRGB(255, 0, 0)
+            else
+                box.Color = Color3.fromRGB(255, 255, 255)
+            end
+
+            box.Visible = true
+        else
+            box.Visible = false
+        end
+    end
+
+    local conn = RunService.RenderStepped:Connect(update)
+    table.insert(connections, conn)
+end
+
+-- Ligar ESP
+onButton.MouseButton1Click:Connect(function()
+    ESPEnabled = true
+    for _, p in pairs(Players:GetPlayers()) do
+        createESP(p)
+    end
+end)
+
+-- Desligar ESP
+offButton.MouseButton1Click:Connect(function()
+    ESPEnabled = false
+    for _, conn in pairs(connections) do
+        conn:Disconnect()
+    end
+    connections = {}
+
+    for _, v in pairs(Drawing.GetDrawings()) do
+        if v.Visible ~= nil then
+            v.Visible = false
+        end
+    end
+end)
