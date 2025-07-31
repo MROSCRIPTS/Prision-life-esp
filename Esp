@@ -1,3 +1,5 @@
+-- ESP com botão de ligar/desligar para Prison Life (Delta/KRNL)
+
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
@@ -13,7 +15,7 @@ local onButton = Instance.new("TextButton", ScreenGui)
 onButton.Size = UDim2.new(0, 100, 0, 40)
 onButton.Position = UDim2.new(0, 10, 0, 200)
 onButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-onButton.Text = "LIGAR ESP"
+onButton.Text = "LIGAR ESP"j
 
 local offButton = Instance.new("TextButton", ScreenGui)
 offButton.Size = UDim2.new(0, 100, 0, 40)
