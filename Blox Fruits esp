@@ -1,0 +1,89 @@
+--[[ 📌 Blox Fruits ESP - Apenas Jogadores
+   - Mostra time (vermelho pirata, azul marine)
+   - Mostra nível do player
+   - Botões no topo central para ativar/desativar
+--]]
+
+-- Variável de controle
+local mostrarESP = false
+
+-- Função para criar ESP
+local function criarESP(alvo, texto, cor)
+    local esp = Instance.new("BillboardGui", alvo)
+    esp.Name = "ESP_Blox"
+    esp.Size = UDim2.new(0, 200, 0, 50)
+    esp.AlwaysOnTop = true
+    esp.StudsOffset = Vector3.new(0, 3, 0)
+
+    local tag = Instance.new("TextLabel", esp)
+    tag.Size = UDim2.new(1, 0, 1, 0)
+    tag.Text = texto
+    tag.TextColor3 = cor
+    tag.TextStrokeTransparency = 0
+    tag.BackgroundTransparency = 1
+    tag.Font = Enum.Font.SourceSansBold
+    tag.TextScaled = true
+end
+
+-- ESP de jogadores
+local function espJogadores()
+    for _, p in pairs(game.Players:GetPlayers()) do
+        if p ~= game.Players.LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            if not p.Character:FindFirstChild("ESP_Blox") then
+                local time = p.Team and p.Team.Name or "Desconhecido"
+                local cor = time == "Pirates" and Color3.fromRGB(255,0,0) or time == "Marines" and Color3.fromRGB(0,150,255) or Color3.new(1,1,1)
+                local lvl = p:FindFirstChild("Data") and p.Data:FindFirstChild("Level") and p.Data.Level.Value or "N/A"
+                criarESP(p.Character.HumanoidRootPart, p.Name .. " | Lv. " .. lvl, cor)
+            end
+        end
+    end
+end
+
+-- Remover todos ESPs
+local function removerESP()
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("BillboardGui") and obj.Name == "ESP_Blox" then
+            obj:Destroy()
+        end
+    end
+end
+
+-- Loop de atualização
+task.spawn(function()
+    while true do
+        pcall(function()
+            removerESP()
+            if mostrarESP then
+                espJogadores()
+            end
+        end)
+        wait(5)
+    end
+end)
+
+-- GUI com Botões no topo central
+local gui = Instance.new("ScreenGui", game.CoreGui)
+gui.Name = "ESP_GUI"
+
+local function criarBotao(texto, posX, callback)
+    local btn = Instance.new("TextButton", gui)
+    btn.Size = UDim2.new(0, 120, 0, 35)
+    btn.Position = UDim2.new(0.5, posX, 0, 20)
+    btn.AnchorPoint = Vector2.new(0.5, 0)
+    btn.Text = texto
+    btn.TextColor3 = Color3.new(1,1,1)
+    btn.BackgroundColor3 = Color3.fromRGB(30,30,30)
+    btn.BorderSizePixel = 1
+    btn.Font = Enum.Font.SourceSansBold
+    btn.TextScaled = true
+    btn.MouseButton1Click:Connect(callback)
+end
+
+criarBotao("🔴 Ligar ESP", -70, function()
+    mostrarESP = true
+end)
+
+criarBotao("⚫ Desligar ESP", 70, function()
+    mostrarESP = false
+    removerESP()
+end)
